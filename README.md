@@ -16,6 +16,8 @@ npm run build
 
 npm run build -- -mwl
 
+# Win 32 bit
+npm run build -- -w --ia32
 ```
 
 ---

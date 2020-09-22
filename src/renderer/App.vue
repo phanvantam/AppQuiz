@@ -9,10 +9,10 @@
             <div class="pane-group">
                 <div class="pane pane-sm sidebar">
                     <nav class="nav-group">
-                        <router-link to="/form" class="nav-group-item">
+                <!--         <router-link to="/form" class="nav-group-item">
                             <span class="icon icon-home"></span>
                             Trang chủ
-                        </router-link>
+                        </router-link> -->
                         <router-link to="/threads/listing" class="nav-group-item">
                             <span class="icon icon-book"></span>
                             Danh sách đề
@@ -29,7 +29,7 @@
                             <span class="icon icon-info-circled"></span>
                             Thông tin
                         </span>
-                        <h5 class="nav-group-title">Mẫu giao diện</h5>
+                        <!-- <h5 class="nav-group-title">Mẫu giao diện</h5>
                         <router-link to="/listing" class="nav-group-item">
                             <span class="icon icon-cc-share"></span>
                             Listing
@@ -41,7 +41,7 @@
                         <router-link to="/threads/create" class="nav-group-item">
                             <span class="icon icon-cc-share"></span>
                             Tạo đề
-                        </router-link>
+                        </router-link> -->
                     </nav>
                 </div>
                 <div class="pane">

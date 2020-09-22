@@ -19,6 +19,7 @@ var db = {};
 const tables = {
 	Threads: 'Threads',
 	Questions: 'Questions',
+	Media: 'Media',
 };
 
 for(let k in tables) {

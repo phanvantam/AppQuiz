@@ -29,6 +29,7 @@
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
                 <td>
+                    <router-link :to="{name: 'questions.update', params: {id: row._id}}"><span class="icon icon-folder"></span></router-link>
                 </td>
             </tr>
         </tbody>
@@ -53,6 +54,7 @@ export default {
         getData() {
             var _this = this
             this.$db.Questions.find({threads_id: this.threads_id}, function (err, docs) {
+                console.log(docs)
                 _this.table.listing = docs
             });
         },

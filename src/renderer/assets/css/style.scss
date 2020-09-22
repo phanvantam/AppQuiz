@@ -97,6 +97,7 @@ a.btn {
   width: 90%;
 	position: relative;
 	margin-bottom: 10px;
+  text-align: center;
 	.form-control{
 	    padding-left: 37px;
 	    padding-right: 37px;
@@ -116,11 +117,27 @@ a.btn {
 		cursor: pointer;
 	    color: #29a03b;
 	}
+  img{
+    max-width: 200px;
+    margin-top: 10px;
+    max-height: 200px;
+  }
   .stt{
       font-size: 18px;
       text-align: center;
       width: 10%;
       padding-top: 2px;
       font-weight: 600;
+  }
+}
+.form-group.media {
+  text-align: center;
+  .remove span{
+    cursor: pointer;
+    color: #29a03b;
+  }
+  img{
+    max-width: 200px;
+    max-height: 300px;
   }
 }

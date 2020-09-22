@@ -36,6 +36,11 @@ export default new Router({
       component: require('@/components/Questions/Create').default
     },
     {
+      path: '/questions/update/:id',
+      name: 'questions.update',
+      component: require('@/components/Questions/Update').default
+    },
+    {
       path: '*',
       redirect: '/threads/listing'
     }

@@ -70,7 +70,7 @@
         </div>
         <div class="form-actions">
             <router-link :to="{name: 'questions.listing', params: {id: threads_id}}" class="btn btn-form btn-default btn-large">Hủy bỏ</router-link>
-            <span @click="create" type="submit" class="btn btn-form btn-primary btn-large">Khởi tạo</span>
+            <span @click="create" type="submit" class="btn btn-form btn-primary btn-large">Cập nhật</span>
         </div>
     </form>
 </template>
@@ -78,7 +78,9 @@
 <script>
 export default {
     data: () => ({
+        questions_id: null,
         threads_id: null,
+        questions_now: null,
         form: {
             title: null,
             minute: null,
@@ -126,10 +128,19 @@ export default {
         },
     },
     created() {
-        this.threads_id = this.$route.params.id
+        const _this = this
+        this.questions_id = this.$route.params.id
+        this.$db.Questions.findOne({ _id: this.questions_id }, function (err, doc) {
+            _this.questions_now = doc
+            _this.threads_id = doc.threads_id
+            _this.form.answer = doc.answer
+            // _this.form.questions = doc.questions
+            _this.form.minute = doc.minute
+            _this.form.title = doc.title
+            _this.form.note = doc.note
+            _this.form.point = doc.point
+        });
         this.resetFormErrors()
-        for(let i=0;i<4;i++)
-            this.addAnswer()
     },
     methods: {
         onPaste (evt) {
@@ -243,44 +254,30 @@ export default {
         },
         create() {
             if(this.valiadted()) {
-                const _this = this
-
-                // Insert media 
-                for(let index in this.form.questions) {
-                    if(index !== 'type' && this.form.questions[index] !== null) {
-                        this.$db.Questions.insert({
-                            base64: this.form.questions[index]
-                        }, function (err, newDoc) { 
-                            _this.form.questions[index] = newDoc._id
-                        })
-                    }
-                }
-                for(let index in this.form.answer) {
-                    if(this.form.answer[index].content == null) {
-                        this.$db.Questions.insert({
-                            base64: this.form.answer[index].image
-                        }, function (err, newDoc) { 
-                            _this.form.answer[index].image = newDoc._id
-                        })
-                    }
-                }
-
                 const os = require('os')
                 let timestamp = Date.now();
-                this.$db.Questions.insert({
-                    threads_id: this.threads_id,
+                const _this = this
+                this.$db.Questions.update({ _id: this.questions_id }, {
+                    threads_id: this.questions_now.threads_id,
                     title: this.form.title,
                     minute: this.form.minute,
                     point: this.form.point,
                     note: this.form.note,
-                    questions: this.form.questions,
+                    questions: {
+                        image: this.form.questions.image,
+                        type: this.form.questions.type,
+                        audio: this.form.questions.audio,
+                    },
                     answer: this.form.answer,
-                    created_at: os.userInfo().username,
+                    created_at: this.questions_now.created_at,
                     updated_at: os.userInfo().username,
-                    created_time: timestamp,
+                    created_time: this.questions_now.created_time,
                     updated_time: timestamp,
                 }, function (err, newDoc) { 
-                    if(confirm('Thêm thành công, bạn có muốn tiếp tục thêm câu hỏi?')) {
+                    console.log(err)
+                    console.log(newDoc)
+                    return
+                    if(confirm('Cập nhật thành công, bạn có muốn tiếp tục cập nhật câu hỏi?')) {
                         window.location.reload()
                     } else {
                         _this.$router.push({ name: "questions.listing", params: {id: _this.threads_id}})

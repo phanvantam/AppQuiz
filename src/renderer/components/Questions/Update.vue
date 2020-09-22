@@ -128,21 +128,37 @@ export default {
         },
     },
     created() {
-        const _this = this
         this.questions_id = this.$route.params.id
-        this.$db.Questions.findOne({ _id: this.questions_id }, function (err, doc) {
-            _this.questions_now = doc
-            _this.threads_id = doc.threads_id
-            _this.form.answer = doc.answer
-            // _this.form.questions = doc.questions
-            _this.form.minute = doc.minute
-            _this.form.title = doc.title
-            _this.form.note = doc.note
-            _this.form.point = doc.point
-        });
+        this.threads_id = this.$route.params.id
+        this.getData()
         this.resetFormErrors()
     },
     methods: {
+        async getData() {
+            this.questions_now= await this.$db.Questions.asyncFindOne({ _id: this.questions_id })
+            this.threads_id = this.questions_now.threads_id
+            this.form.questions.type = this.questions_now.questions.type
+            this.form.minute = this.questions_now.minute
+            this.form.title = this.questions_now.title
+            this.form.note = this.questions_now.note
+            this.form.point = this.questions_now.point
+
+            // Udate key image
+            for(let index in this.questions_now.questions) {
+                if(index !== 'type' && this.questions_now.questions[index] !== null) {
+                    let row = await this.$db.Media.asyncFindOne({ _id: this.questions_now.questions[index]})
+                    this.form.questions[index] = row.base64
+                }
+            }
+            for(let index in this.questions_now.answer) {
+                let temp = Object.assign({}, this.questions_now.answer[index])
+                if('image' in temp && temp.content === null  && temp.image !== null) {
+                    let row = await this.$db.Media.asyncFindOne({ _id: temp.image})
+                    temp.image = row.base64
+                }
+                this.form.answer.push(temp)
+            }
+        },
         onPaste (evt) {
             this.getFileBase(evt.clipboardData.files)
         },
@@ -228,7 +244,7 @@ export default {
                 this.form.errors.questions.image = 'Vui lòng paste một ảnh'
             } else if(this.form.questions.text == null && this.form.questions.type == 1){
                 pass = false 
-                this.form.errors.questions.text = 'Vui lòng nhập nội dụng'
+                this.form.errors.questions.text = 'Vui lòng nhập nội dung'
             }
 
             if(!this.form.answer.length) {
@@ -252,38 +268,52 @@ export default {
             }
             return pass
         },
-        create() {
+        async create() {
             if(this.valiadted()) {
                 const os = require('os')
                 let timestamp = Date.now();
-                const _this = this
-                this.$db.Questions.update({ _id: this.questions_id }, {
+                var data_update = {
                     threads_id: this.questions_now.threads_id,
                     title: this.form.title,
                     minute: this.form.minute,
                     point: this.form.point,
                     note: this.form.note,
                     questions: {
-                        image: this.form.questions.image,
                         type: this.form.questions.type,
-                        audio: this.form.questions.audio,
                     },
                     answer: this.form.answer,
                     created_at: this.questions_now.created_at,
                     updated_at: os.userInfo().username,
                     created_time: this.questions_now.created_time,
                     updated_time: timestamp,
-                }, function (err, newDoc) { 
-                    console.log(err)
-                    console.log(newDoc)
-                    return
+                }
+                // Insert media 
+                for(let index in this.form.questions) {
+                    if(index !== 'type' && this.form.questions[index] !== null) {
+                        let row = await this.$db.Media.asyncInsert({
+                            base64: this.form.questions[index]
+                        })
+                        data_update.questions[index] = row._id
+                    }
+                }
+                for(let index in data_update.answer) {
+                    if(data_update.answer[index].content == null) {
+                        let row = await this.$db.Media.asyncInsert({
+                            base64: data_update.answer[index].image
+                        })
+                        data_update.answer[index].image = row._id
+                    }
+                }
+                let row = this.$db.Questions.asyncUpdate({'_id': this.questions_id}, data_update)
+                .then(docs => {
                     if(confirm('Cập nhật thành công, bạn có muốn tiếp tục cập nhật câu hỏi?')) {
                         window.location.reload()
                     } else {
-                        _this.$router.push({ name: "questions.listing", params: {id: _this.threads_id}})
+                        this.$router.push({ name: "questions.listing", params: {id: this.threads_id}})
                     }
-                });
+                })
             }
+
         }
     }
 }

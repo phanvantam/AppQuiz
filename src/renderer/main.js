@@ -12,8 +12,7 @@ Vue.config.productionTip = false
 const electron = require('electron');
 Vue.electron   = Vue.prototype.$electron = electron;
 const userData = electron.remote.app.getPath('userData');
-const Database = require('nedb'); 
-
+const { AsyncNedb } = require('nedb-async')
 /*Danh sách table chứa data*/
 var db = {};
 const tables = {
@@ -21,9 +20,8 @@ const tables = {
 	Questions: 'Questions',
 	Media: 'Media',
 };
-
 for(let k in tables) {
-	db[k] = new Database({ filename: userData+'/db/'+ tables[k] +'.db', autoload: true });
+	db[k] = new AsyncNedb({ filename: userData+'/db/'+ tables[k] +'.db', autoload: true });
 }
 
 Vue.db   = Vue.prototype.$db = db;

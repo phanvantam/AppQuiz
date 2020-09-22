@@ -109,25 +109,25 @@ export default {
             }
             return pass
         },
-        create() {
+        async create() {
             if(this.valiadted()) {
                 const os = require('os')
                 let timestamp = Date.now();
                 const _this = this 
-                this.$db.Threads.insert({
+                this.$db.Threads.asyncInsert({
                     title: this.form.title,
                     description: this.form.description,
                     created_at: os.userInfo().username,
                     updated_at: os.userInfo().username,
                     created_time: timestamp,
                     updated_time: timestamp,
-                }, function (err, newDoc) { 
+                }).then(docs => {
                     if(confirm('Tạo đề thành công, bạn có muốn thêm câu hỏi luôn?')) {
-                        _this.$router.push({ name: "questions.create", params: {id: newDoc._id}})
+                        this.$router.push({ name: "questions.create", params: {id: docs._id}})
                     } else {
-                        _this.$router.push({ name: "threads.listing"})
+                        this.$router.push({ name: "threads.listing"})
                     }
-                });
+                })
             }
         }
     }

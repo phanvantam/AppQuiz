@@ -15,7 +15,8 @@
             <tr>
                 <th>STT</th>
                 <th>Tiêu đề</th>
-                <th>Loại</th>
+                <th>Điểm</th>
+                <th>Thời gian (m)</th>
                 <th>Tạo lúc</th>
                 <th>Cập nhật lúc</th>
                 <th>Tác vụ</th>
@@ -25,11 +26,12 @@
             <tr v-for="(row, index) in table.listing">
                 <td>{{ index+1 }}</td>
                 <td>{{ row.title }}</td>
-                <td>0</td>
+                <td>{{ row.point }}</td>
+                <td>{{ row.minute }}</td>
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
                 <td>
-                    <router-link :to="{name: 'questions.update', params: {id: row._id}}"><span class="icon icon-folder"></span></router-link>
+                    <router-link :to="{name: 'questions.update', params: {id: row._id}}"><span class="icon icon-pencil"></span></router-link>
                 </td>
             </tr>
         </tbody>

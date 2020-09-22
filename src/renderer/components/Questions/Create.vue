@@ -217,7 +217,7 @@ export default {
                 this.form.errors.questions.image = 'Vui lòng paste một ảnh'
             } else if(this.form.questions.text == null && this.form.questions.type == 1){
                 pass = false 
-                this.form.errors.questions.text = 'Vui lòng nhập nội dụng'
+                this.form.errors.questions.text = 'Vui lòng nhập nội dung'
             }
 
             if(!this.form.answer.length) {
@@ -241,51 +241,50 @@ export default {
             }
             return pass
         },
-        create() {
+        async create() {
             if(this.valiadted()) {
-                const _this = this
-
-                // Insert media 
-                for(let index in this.form.questions) {
-                    if(index !== 'type' && this.form.questions[index] !== null) {
-                        this.$db.Questions.insert({
-                            base64: this.form.questions[index]
-                        }, function (err, newDoc) { 
-                            _this.form.questions[index] = newDoc._id
-                        })
-                    }
-                }
-                for(let index in this.form.answer) {
-                    if(this.form.answer[index].content == null) {
-                        this.$db.Questions.insert({
-                            base64: this.form.answer[index].image
-                        }, function (err, newDoc) { 
-                            _this.form.answer[index].image = newDoc._id
-                        })
-                    }
-                }
-
                 const os = require('os')
                 let timestamp = Date.now();
-                this.$db.Questions.insert({
+                var data_insert = {
                     threads_id: this.threads_id,
                     title: this.form.title,
                     minute: this.form.minute,
                     point: this.form.point,
                     note: this.form.note,
-                    questions: this.form.questions,
+                    questions: {
+                        type: this.form.questions.type,
+                    },
                     answer: this.form.answer,
                     created_at: os.userInfo().username,
                     updated_at: os.userInfo().username,
                     created_time: timestamp,
                     updated_time: timestamp,
-                }, function (err, newDoc) { 
+                }
+                // Insert media 
+                for(let index in this.form.questions) {
+                    if(index !== 'type' && this.form.questions[index] !== null) {
+                        let row = await this.$db.Media.asyncInsert({
+                            base64: this.form.questions[index]
+                        })
+                        data_insert.questions[index] = row._id
+                    }
+                }
+                for(let index in data_insert.answer) {
+                    if(data_insert.answer[index].content == null) {
+                        let row = await this.$db.Media.asyncInsert({
+                            base64: data_insert.answer[index].image
+                        })
+                        data_insert.answer[index].image = row._id
+                    }
+                }
+                this.$db.Questions.asyncInsert(data_insert)
+                .then(docs => {
                     if(confirm('Thêm thành công, bạn có muốn tiếp tục thêm câu hỏi?')) {
                         window.location.reload()
                     } else {
-                        _this.$router.push({ name: "questions.listing", params: {id: _this.threads_id}})
+                        this.$router.push({ name: "questions.listing", params: {id: this.threads_id}})
                     }
-                });
+                })
             }
         }
     }

@@ -9,39 +9,22 @@
             <div class="pane-group">
                 <div class="pane pane-sm sidebar">
                     <nav class="nav-group">
-                <!--         <router-link to="/form" class="nav-group-item">
-                            <span class="icon icon-home"></span>
-                            Trang chủ
-                        </router-link> -->
                         <router-link to="/threads/listing" class="nav-group-item">
                             <span class="icon icon-book"></span>
                             Danh sách đề
+                        </router-link>
+                        <router-link to="/system/log" class="nav-group-item">
+                            <span class="icon icon-back-in-time"></span>
+                            Lịch sử
                         </router-link>
                         <span class="nav-group-item">
                             <span class="icon icon-cog"></span>
                             Cài đặt
                         </span>
                         <span class="nav-group-item">
-                            <span class="icon icon-back-in-time"></span>
-                            Lịch sử
-                        </span>
-                        <span class="nav-group-item">
                             <span class="icon icon-info-circled"></span>
                             Thông tin
                         </span>
-                        <!-- <h5 class="nav-group-title">Mẫu giao diện</h5>
-                        <router-link to="/listing" class="nav-group-item">
-                            <span class="icon icon-cc-share"></span>
-                            Listing
-                        </router-link>
-                        <router-link to="/form" class="nav-group-item">
-                            <span class="icon icon-cc-share"></span>
-                            Form
-                        </router-link>
-                        <router-link to="/threads/create" class="nav-group-item">
-                            <span class="icon icon-cc-share"></span>
-                            Tạo đề
-                        </router-link> -->
                     </nav>
                 </div>
                 <div class="pane">
@@ -53,7 +36,32 @@
 </template>
 <script>
 export default {
-    name: 'AppQuiz'
+    name: 'AppQuiz',
+    methods: {
+        writeLog(type, record_id, note) {
+            switch(type) {
+                case 1:
+                type = 'Thêm mới'
+                break
+                case 2:
+                type = 'Cập nhật'
+                break
+                case 3:
+                type = 'Xóa bỏ'
+                break
+            }
+            const os = require('os')
+            let timestamp = Date.now();
+            var data_insert = {
+                record_id: record_id,
+                type: type,
+                note: note,
+                created_at: os.userInfo().username,
+                created_time: timestamp,
+            }
+            this.$db.Logs.insert(data_insert)
+        }
+    }
 }
 </script>
 <style>

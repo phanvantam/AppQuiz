@@ -1,5 +1,5 @@
 <template>
-    <form class="form">
+    <form class="form" @submit.prevent="create">
         <div class="form-group">
             <label>Tiêu đề <span class="text-danger">*</span></label>
             <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập">
@@ -278,7 +278,8 @@ export default {
                     }
                 }
                 this.$db.Questions.asyncInsert(data_insert)
-                .then(docs => {
+                .then(doc => {
+                    this.$options.parent.writeLog(1, doc._id, `Đã thêm câu hỏi "${doc.title}"`)
                     if(confirm('Thêm thành công, bạn có muốn tiếp tục thêm câu hỏi?')) {
                         window.location.reload()
                     } else {

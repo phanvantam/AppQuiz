@@ -1,5 +1,5 @@
 <template>
-    <form class="form">
+    <form class="form" @submit.prevent="update">
         <div class="form-group">
             <label>Tiêu đề <span class="text-danger">*</span></label>
             <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập">
@@ -305,9 +305,10 @@ export default {
                     }
                 }
                 let row = this.$db.Questions.asyncUpdate({'_id': this.questions_id}, data_update)
-                .then(docs => {
+                .then(doc => {
+                    this.$options.parent.writeLog(2, this.questions_id, `Đã cập nhật câu hỏi "${data_update.title}"`)
                     if(confirm('Cập nhật thành công, bạn có muốn tiếp tục cập nhật câu hỏi?')) {
-                        window.location.reload()
+                        this.getData()
                     } else {
                         this.$router.push({ name: "questions.listing", params: {id: this.threads_id}})
                     }

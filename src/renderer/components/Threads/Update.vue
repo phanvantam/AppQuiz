@@ -1,5 +1,5 @@
 <template>
-    <form class="form" @submit.prevent="create">
+    <form class="form" @submit.prevent="update">
         <div class="form-group">
             <label>Tiêu đề <span class="text-danger">*</span></label>
             <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập">
@@ -31,7 +31,7 @@
         </div>
         <div class="form-actions">
             <router-link :to="{name: 'threads.listing'}" class="btn btn-form btn-default btn-large">Hủy bỏ</router-link>
-            <span @click="create" type="submit" class="btn btn-form btn-primary btn-large">Khởi tạo</span>
+            <span @click="update" type="submit" class="btn btn-form btn-primary btn-large">Cập nhật</span>
         </div>
     </form>
 </template>
@@ -39,6 +39,7 @@
 <script>
 export default {
     data: () => ({
+        threads_now: null,
         form: {
             title: null,
             description: {
@@ -57,9 +58,9 @@ export default {
     }),
     watch: {
         'form.description.type': function(_new) {
-            this.removeValueDescription()
             this.form.switch.description.video = false
             this.form.switch.description.image = false
+            this.removeValueDescription()
             switch(Number(_new)) {
                 case 1:
                     this.form.switch.description.image = true
@@ -70,12 +71,27 @@ export default {
         }
     },
     created() {
+        this.threads_id = this.$route.params.id
+        this.getData()
         this.resetFormErrors()
     },
     methods: {
+        async getData() {
+            this.threads_now = await this.$db.Threads.asyncFindOne({ _id: this.threads_id })
+            this.form.title = this.threads_now.title
+            this.form.description.type = this.threads_now.description.type
+
+            if(this.threads_now.description.type == 1) {
+                this.form.description.image = (await this.$db.Media.asyncFindOne({ _id: this.threads_now.description.image})).base64
+            } else {
+                this.form.description.video = this.threads_now.description.video
+            }
+        },
         removeValueDescription() {
-            this.form.description.image = null
-            this.form.description.video = null
+            if(Number(this.form.description.type) == 1)
+                this.form.description.video = null
+            else 
+                this.form.description.image = null
         },
         onFileChange(e) {
             var files = e.target.files || e.dataTransfer.files
@@ -119,33 +135,31 @@ export default {
             }
             return pass
         },
-        async create() {
+        async update() {
 
             if(this.valiadted()) {
                 const os = require('os')
                 let timestamp = Date.now();
-                var data_insert = {
+                var data_update = {
                     title: this.form.title,
                     description: {
                         type: this.form.description.type
                     },
-                    created_at: os.userInfo().username,
+                    created_at: this.threads_now.created_at,
                     updated_at: os.userInfo().username,
-                    created_time: timestamp,
+                    created_time: this.threads_now.created_time,
                     updated_time: timestamp,
                 }
                 if(this.form.description.type == 1) {
-                    data_insert.description.image = (await this.$db.Media.asyncInsert({
+                    data_update.description.image = (await this.$db.Media.asyncInsert({
                             base64: this.form.description.image
                         }))._id
                 } else {
-                    data_insert.description.video = this.form.description.video
+                    data_update.description.video = this.form.description.video
                 }
-                this.$db.Threads.asyncInsert(data_insert).then(doc => {
-                    this.$options.parent.writeLog(1, doc._id, `Đã thêm đề "${doc.title}"`)
-                    if(confirm('Tạo đề thành công, bạn có muốn thêm câu hỏi luôn?')) {
-                        this.$router.push({ name: "questions.create", params: {id: doc._id}})
-                    } else {
+                this.$db.Threads.asyncUpdate({ _id: this.threads_id }, data_update).then(doc => {
+                    this.$options.parent.writeLog(2, this.threads_id, `Đã cập nhật đề "${data_update.title}"`)
+                    if(!confirm('Cập nhật thành công, bạn có muốn tiếp tục chỉnh sửa không?')) {
                         this.$router.push({ name: "threads.listing"})
                     }
                 })

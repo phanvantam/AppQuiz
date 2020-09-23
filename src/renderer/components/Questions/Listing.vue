@@ -30,8 +30,9 @@
                 <td>{{ row.minute }}</td>
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
-                <td>
+                <td class="actions">
                     <router-link :to="{name: 'questions.update', params: {id: row._id}}"><span class="icon icon-pencil"></span></router-link>
+                    <a href="#" @click="removeRecord(index)"><span class="icon icon-trash"></span></a>
                 </td>
             </tr>
         </tbody>
@@ -47,7 +48,6 @@ export default {
             listing: []
         },
     }),
-    watch: {},
     created() {
         this.threads_id = this.$route.params.id
         this.getData()
@@ -56,12 +56,36 @@ export default {
         getData() {
             var _this = this
             this.$db.Questions.find({threads_id: this.threads_id}, function (err, docs) {
-                console.log(docs)
                 _this.table.listing = docs
             });
         },
         formatDate(unix_timestamp) {
             return new Date(unix_timestamp).toISOString().slice(0, 19).replace('T', ' ')
+        },
+        async removeRecord(index) {
+            const row = this.table.listing[index]
+            if(confirm(`Xác nhận xóa "${row.title}"`)) {
+                // Xóa câu hỏi, Xóa media
+                let trash = {
+                    media: [],
+                    questions: row._id
+                }
+                // Lấy tất cả media đang dùng
+                // Lấy media trong answer
+                for(let i2 in row.answer) {
+                    if('image' in row.answer[i2] && row.answer[i2].image != null) 
+                        trash.media.push(row.answer[i2].image)
+                }
+                for(let i2 in row.questions) {
+                    if(i2 !== 'type' && row.questions[i2] !== null) {
+                        trash.media.push(row.questions[i2])
+                    }
+                }
+                await this.$db.Media.asyncRemove({ _id: {$in: trash.media}}, { multi: true })
+                await this.$db.Questions.asyncRemove({ _id: trash.questions})
+                this.$options.parent.writeLog(3, trash.questions, `Đã xóa câu hỏi "${row.title}"`)
+                this.getData()
+            }
         }
     }
 }

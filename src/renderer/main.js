@@ -19,6 +19,7 @@ const tables = {
 	Threads: 'Threads',
 	Questions: 'Questions',
 	Media: 'Media',
+	Logs: 'Logs',
 };
 for(let k in tables) {
 	db[k] = new AsyncNedb({ filename: userData+'/db/'+ tables[k] +'.db', autoload: true });

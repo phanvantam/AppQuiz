@@ -26,6 +26,11 @@ export default new Router({
       component: require('@/components/Threads/Create').default
     },
     {
+      path: '/threads/update/:id',
+      name: 'threads.update',
+      component: require('@/components/Threads/Update').default
+    },
+    {
       path: '/questions/listing/:id',
       name: 'questions.listing',
       component: require('@/components/Questions/Listing').default
@@ -39,6 +44,11 @@ export default new Router({
       path: '/questions/update/:id',
       name: 'questions.update',
       component: require('@/components/Questions/Update').default
+    },
+    {
+      path: '/system/log',
+      name: 'system.log',
+      component: require('@/components/System/Log').default
     },
     {
       path: '*',

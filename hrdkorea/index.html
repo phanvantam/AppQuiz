@@ -186,7 +186,6 @@
                         </colgroup>
                         <tbody></tbody>
                     </table>
-                    
                 </div>
             </div>
             <div id="welcome-step">
@@ -232,6 +231,10 @@
     		answerStt: [
     			'①', '②', '③', '④'
     		],
+            config: {
+                time_start: 1000,
+                time_show_info_listen: 1000
+            },
     		questions: [
   {
     "threads_id": "7DcO0oX0lmRgDNZ9",
@@ -486,7 +489,7 @@
 	    			setTimeout(function(){
 					    renderListAnswer();
                         $("#containerWrap").removeClass("welcome");
-					}, 100);
+					}, database.config.time_start);
 	    		}
     		} 
     	}
@@ -582,10 +585,11 @@
                     // Ẩn button next read
                     $('#examNextPrevious').hide();
                     $('#questionListenNext').show();
+                    $("#examTestView .qHead").html('<br /><br /><br />');
                     $("#examTestView .qType tbody").html(`<tr><td align="center" style="font-size:20px;"><b>듣기 (5문항)</b></td></tr><tr><td width="500"><hr></td></tr><tr><td align="right">*모든 듣기 문제는 두 번씩 들려 드립니다.</td></tr>`);
                     setTimeout(function() {
                         questionNext();                          
-                    }, 500);
+                    }, database.config.time_show_info_listen);
                     return;
                 }
             } 
@@ -668,7 +672,6 @@
             }
         }
 
-    	welcomeStep(2);
         // Next câu hỏi ở danh sách sidebar
         $(document).on('click', '.ansType .question', function() {
             if(show_info_read) return;
@@ -677,7 +680,6 @@
         });
         // Đếm ngược thời gian làm đề
         function startTimer(duration, display) {
-            duration = 5;
             var timer = duration, minutes, seconds;
             startTimerThis = setInterval(function () {
                 minutes = parseInt(timer / 60, 10);
@@ -774,6 +776,8 @@
             $("#point .value").text(question_point);
             $("#containerWrap").addClass("show-point");
         }
+        welcomeStep(0);
+
     </script>
 </body>
 </html>

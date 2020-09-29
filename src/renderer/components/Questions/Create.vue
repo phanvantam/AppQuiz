@@ -126,6 +126,7 @@ export default {
         },
     },
     created() {
+        this.$options.parent.setTitle('Tạo mới câu hỏi')
         this.threads_id = this.$route.params.id
         this.resetFormErrors()
         for(let i=0;i<4;i++)

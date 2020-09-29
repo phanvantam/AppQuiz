@@ -37,7 +37,9 @@ export default {
     },
     methods: {
         async getData() {
-            this.table.listing = await this.$db.Logs.asyncFind({});
+            this.table.listing = (await this.$db.Logs.asyncFind({})).sort((a, b)=>{
+                    return b.created_time - a.created_time
+                })
         },
         formatDate(unix_timestamp) {
             return new Date(unix_timestamp).toISOString().slice(0, 19).replace('T', ' ')

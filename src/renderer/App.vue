@@ -2,7 +2,7 @@
     <div id="app" class="window">
         <!-- .toolbar-header sits at the top of your app -->
         <header class="toolbar toolbar-header">
-            <h1 class="title">Header with actions</h1>
+            <h1 class="title">{{ title }}</h1>
         </header>
         <!-- Your app's content goes inside .window-content -->
         <div class="window-content">
@@ -17,14 +17,14 @@
                             <span class="icon icon-back-in-time"></span>
                             Lịch sử
                         </router-link>
-                        <span class="nav-group-item">
+                        <router-link to="/system/config" class="nav-group-item">
                             <span class="icon icon-cog"></span>
                             Cài đặt
-                        </span>
-                        <span class="nav-group-item">
+                        </router-link>
+                        <router-link to="/system/info" class="nav-group-item">
                             <span class="icon icon-info-circled"></span>
                             Thông tin
-                        </span>
+                        </router-link>
                     </nav>
                 </div>
                 <div class="pane">
@@ -36,7 +36,9 @@
 </template>
 <script>
 export default {
-    name: 'AppQuiz',
+    data: ()=>({
+        title: 'AppQuiz'
+    }),
     methods: {
         writeLog(type, record_id, note) {
             switch(type) {
@@ -49,6 +51,9 @@ export default {
                 case 3:
                 type = 'Xóa bỏ'
                 break
+                case 4:
+                type = 'Export'
+                break
             }
             const os = require('os')
             let timestamp = Date.now();
@@ -60,6 +65,9 @@ export default {
                 created_time: timestamp,
             }
             this.$db.Logs.insert(data_insert)
+        },
+        setTitle(v){
+            this.title = v
         }
     }
 }

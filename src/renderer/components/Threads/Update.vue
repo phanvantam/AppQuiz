@@ -78,6 +78,7 @@ export default {
     methods: {
         async getData() {
             this.threads_now = await this.$db.Threads.asyncFindOne({ _id: this.threads_id })
+            this.$options.parent.setTitle(`Cập nhật đề "${this.threads_now.title}"`)
             this.form.title = this.threads_now.title
             this.form.description.type = this.threads_now.description.type
 

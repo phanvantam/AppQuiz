@@ -1,8 +1,23 @@
 <template>
     <div>
         <div class="toolbar-actions clearfix">
-                <div class="pull-left" style="width: 70%;">
-                    <input style="width: 30%" type="text" class="form-control" placeholder="Tiêu đề">
+                <div class="pull-left" style="width: 80%;">
+                    <input @keyup.enter="getData" v-model="table.q" style="width: 23%" type="text" class="form-control" placeholder="Tiêu đề">
+                    <select v-model="table.sort.total" style="width: 23%" class="form-control">
+                        <option value="0">-- Sắp xếp theo số câu hỏi --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
+                    <select v-model="table.sort.point" style="width: 23%" class="form-control">
+                        <option value="0">-- Sắp xếp theo điểm --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
+                    <select v-model="table.sort.date" style="width: 23%" class="form-control">
+                        <option value="0">-- Sắp xếp theo thời gian --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
                 </div>
                 <div class="btn-group pull-right">
                     <router-link to="/threads/create" class="btn btn-large btn-positive">
@@ -49,15 +64,40 @@
 export default {
     data: () => ({
         table: {
-            listing: []
+            listing: [],
+            sort: {
+                date: 0,
+                point: 0,
+                total: 0
+            },
+            q: ''
         },
     }),
     created() {
+        this.$options.parent.setTitle('Danh sách đề')
         this.getData()
+    },
+    watch: {
+        'table.sort.date': function() {
+            this.getData()
+        },
+        'table.sort.point': function() {
+            this.getData()
+        },
+        'table.sort.total': function() {
+            this.getData()
+        }
     },
     methods: {
         async getData() {
-            var rows = await this.$db.Threads.asyncFind({});
+            const _this = this
+            var options = {}
+            if(this.table.q !== '') {
+                options.title = {
+                    $regex: new RegExp(`${this.table.q.trim()}`, 'g')
+                }
+            }
+            var rows = await this.$db.Threads.asyncFind(options)
             for(let index in rows) {
                 let questions = await this.$db.Questions.asyncFind({'threads_id': rows[index]._id})
                 rows[index].questions = {}
@@ -68,6 +108,33 @@ export default {
                     rows[index].questions.point += Number(questions[i].point)
                     rows[index].questions.minute += Number(questions[i].minute)
                 }
+            }
+            if(Number(this.table.sort.date) > 0) {
+                // Sort date
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.date) === 2) 
+                        return a.created_time - b.created_time
+                    else 
+                        return b.created_time - a.created_time
+                })
+            }
+            if(Number(this.table.sort.point) > 0) {
+                // Sort point
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.point) === 2) 
+                        return a.questions.point - b.questions.point
+                    else
+                        return b.questions.point - a.questions.point
+                })
+            }
+            if(Number(this.table.sort.total) > 0) {
+                // Sort số câu hỏi
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.total) === 2) 
+                        return a.questions.count - b.questions.count
+                    else
+                        return b.questions.count - a.questions.count
+                })
             }
             this.table.listing = rows
         },
@@ -164,6 +231,7 @@ export default {
             fileLink.setAttribute('download', this.changeToSlug(row.title)+'.html');
             document.body.appendChild(fileLink);
             fileLink.click();
+            this.$options.parent.writeLog(4, row._id, `Đã tải xuống đề "${row.title}"`)
         }
     }
 }

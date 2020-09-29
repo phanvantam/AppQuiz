@@ -1,8 +1,23 @@
 <template>
     <div>
         <div class="toolbar-actions clearfix">
-                <div class="pull-left" style="width: 70%;">
-                    <input style="width: 30%" type="text" class="form-control" placeholder="Tiêu đề">
+                <div class="pull-left" style="width: 80%;">
+                    <input @keyup.enter="getData" v-model="table.q" style="width: 23%" type="text" class="form-control" placeholder="Tiêu đề">
+                    <select v-model="table.sort.point" style="width: 23%" class="form-control">
+                        <option value="0">-- Sắp xếp theo điểm --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
+                    <select v-model="table.sort.date" style="width: 23%" class="form-control">
+                        <option value="0">-- Sắp xếp theo thời gian --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
+                    <select v-model="table.sort.time" style="width: 23%" class="form-control">
+                        <option value="0">-- Thời gian trả lời --</option>
+                        <option value="1">Cao đến thấp</option>
+                        <option value="2">Thấp đến cao</option>
+                    </select>
                 </div>
                 <div class="btn-group pull-right">
                     <router-link :to="{name: 'questions.create', params: {id: threads_id}}" class="btn btn-large btn-positive">
@@ -45,19 +60,70 @@ export default {
     data: () => ({
         threads_id: null,
         table: {
-            listing: []
+            listing: [],
+            sort: {
+                date: 0,
+                point: 0,
+                time: 0,
+            },
+            q: ''
         },
     }),
     created() {
+        this.$options.parent.setTitle('Danh sách câu hỏi')
         this.threads_id = this.$route.params.id
         this.getData()
     },
+    watch: {
+        'table.sort.date': function() {
+            this.getData()
+        },
+        'table.sort.point': function() {
+            this.getData()
+        },
+        'table.sort.time': function() {
+            this.getData()
+        }
+    },
+
     methods: {
-        getData() {
+        async getData() {
             var _this = this
-            this.$db.Questions.find({threads_id: this.threads_id}, function (err, docs) {
-                _this.table.listing = docs
-            });
+            var options = {threads_id: this.threads_id}
+            if(this.table.q !== '') {
+                options.title = {
+                    $regex: new RegExp(`${this.table.q.trim()}`, 'g')
+                }
+            }
+            var rows = await this.$db.Questions.asyncFind(options)
+            if(Number(this.table.sort.date) > 0) {
+                // Sort date
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.date) === 2) 
+                        return a.created_time - b.created_time
+                    else 
+                        return b.created_time - a.created_time
+                })
+            }
+            if(Number(this.table.sort.point) > 0) {
+                // Sort point
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.point) === 2) 
+                        return a.point - b.point
+                    else
+                        return b.point - a.point
+                })
+            }
+            if(Number(this.table.sort.time) > 0) {
+                // Sort time
+                rows.sort((a, b)=>{
+                    if(Number(_this.table.sort.time) === 2) 
+                        return a.time - b.time
+                    else
+                        return b.time - a.time
+                })
+            }
+            this.table.listing = rows
         },
         formatDate(unix_timestamp) {
             return new Date(unix_timestamp).toISOString().slice(0, 19).replace('T', ' ')

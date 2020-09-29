@@ -54,7 +54,7 @@
       "icon": "static/icons/icon.ico"
     },
     "linux": {
-      "icon": "static/icons/128x128.png"
+      "icon": "static/icons/256x256.png"
     },
     "mac": {
       "icon": "static/icons/icon.icns"

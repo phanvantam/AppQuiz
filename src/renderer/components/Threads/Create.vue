@@ -70,6 +70,7 @@ export default {
         }
     },
     created() {
+        this.$options.parent.setTitle('Tạo mới đề')
         this.resetFormErrors()
     },
     methods: {

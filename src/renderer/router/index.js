@@ -51,6 +51,16 @@ export default new Router({
       component: require('@/components/System/Log').default
     },
     {
+      path: '/system/config',
+      name: 'system.config',
+      component: require('@/components/System/Config').default
+    },
+    {
+      path: '/system/info',
+      name: 'system.info',
+      component: require('@/components/System/Info').default
+    },
+    {
       path: '*',
       redirect: '/threads/listing'
     }

@@ -128,6 +128,7 @@ export default {
         },
     },
     created() {
+        this.$options.parent.setTitle('Cập nhật câu hỏi')
         this.questions_id = this.$route.params.id
         this.threads_id = this.$route.params.id
         this.getData()

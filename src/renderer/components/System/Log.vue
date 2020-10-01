@@ -33,6 +33,7 @@ export default {
         },
     }),
     created() {
+        this.$options.parent.setTitle('Lịch sử thao tác')
         this.getData()
     },
     methods: {

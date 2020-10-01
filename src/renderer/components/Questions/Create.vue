@@ -9,22 +9,20 @@
             <label>Loại câu hỏi <span class="text-danger">*</span></label>
             <select class="form-control" v-model="form.questions.type">
                 <option value="1">Văn bản</option>
-                <option value="2">Tải lên hình ảnh</option>
+                <option value="2">Hình ảnh</option>
                 <option value="3">Âm thanh</option>
-                <option value="4">Paste hình ảnh</option>
             </select>
         </div>
-        <div class="form-group" v-if="form.switch.questions.paste">
-            <label>Paste một hình ảnh vào đây <span class="text-danger">*</span></label>
-            <input @paste="onPaste" type="text" class="form-control" placeholder="Vui lòng nhập">
-            <p class="text-danger help-block" v-if="form.errors.questions.image">{{ form.errors.questions.image }}</p>
-        </div>
-        
         <div class="form-group" v-if="form.switch.questions.media">
             <label>Chọn tệp <span class="text-danger">*</span></label>
             <input type="file" @change="onFileChange" class="form-control" placeholder="Vui lòng nhập">
             <p class="text-danger help-block" v-if="form.errors.questions.image">{{ form.errors.questions.image }}</p>
             <p class="text-danger help-block" v-if="form.errors.questions.audio">{{ form.errors.questions.audio }}</p>
+        </div>
+        <div class="form-group" v-if="form.switch.questions.media">
+            <label>Paste một hình ảnh vào đây <span v-if="form.switch.questions.image" class="text-danger">*</span></label>
+            <input @paste="onPaste" type="text" class="form-control" placeholder="Vui lòng nhập">
+            <p class="text-danger help-block" v-if="form.errors.questions.image">{{ form.errors.questions.image }}</p>
         </div>
         <div class="form-group" v-if="form.switch.questions.text">
             <label>Nội dung <span class="text-danger">*</span></label>
@@ -32,10 +30,11 @@
             <p class="text-danger help-block" v-if="form.errors.questions.text">{{ form.errors.questions.text }}</p>
         </div>
         <div class="form-group media">
-            <img v-if="form.questions.image" :src="form.questions.image">
             <audio v-if="form.questions.audio" controls>
               <source :src="form.questions.audio">
             </audio>
+            <hr v-if="form.questions.audio && form.questions.image" />
+            <img v-if="form.questions.image" :src="form.questions.image">
             <p class="text-center remove"><span @click="removeValueQuestions" class="text-danger">--- Xóa nội dung ---</span></p>
         </div>
         <div class="form-group">
@@ -93,8 +92,9 @@ export default {
             answer: [],
             switch: {
                 questions: {
+                    audio: false,
+                    image: false,
                     media: false,
-                    paste: false,
                     text: true,
                 }
             },
@@ -105,19 +105,21 @@ export default {
     watch: {
         'form.questions.type': function(_new) {
             this.form.switch.questions.media = false
-            this.form.switch.questions.paste = false
+            this.form.switch.questions.audio = false
+            this.form.switch.questions.image = false
             this.form.switch.questions.text  = false
             this.removeValueQuestions()
             switch(Number(_new)) {
                 case 1:
                     this.form.switch.questions.text = true
                 break
-                case 4:
-                    this.form.switch.questions.paste = true
+                case 2:
+                    this.form.switch.questions.image = true
                 break
-                default:
-                    this.form.switch.questions.media = true
+                case 3:
+                    this.form.switch.questions.audio = true
             }
+            this.form.switch.questions.media = this.form.switch.questions.image || this.form.switch.questions.audio
         },
         'form.answer': function() {
             for(let i = 0;i < this.form.answer.length;i++) {
@@ -154,12 +156,16 @@ export default {
                     vm.form.answer[answer_index].content = null
                 } else {
                     switch(Number(vm.form.questions.type)){
-                        case 4:
                         case 2:
                             vm.form.questions.image = e.target.result
                         break
-                        default:
-                            vm.form.questions.audio = e.target.result
+                        case 3:
+                            var isBase64 = require('is-base64')
+                            if(isBase64(e.target.result, { allowMime: true })) {
+                                vm.form.questions.image = e.target.result
+                            } else {
+                                vm.form.questions.audio = e.target.result
+                            }
                     }
                 }
             }
@@ -213,9 +219,6 @@ export default {
             } else if(this.form.questions.type == 3 && this.form.questions.audio == null) {
                 pass = false
                 this.form.errors.questions.audio = 'Vui lòng chọn một tệp âm thanh'
-            } else if(this.form.questions.type == 4 && this.form.questions.image == null) {
-                pass = false
-                this.form.errors.questions.image = 'Vui lòng paste một ảnh'
             } else if(this.form.questions.text == null && this.form.questions.type == 1){
                 pass = false 
                 this.form.errors.questions.text = 'Vui lòng nhập nội dung'
@@ -278,6 +281,7 @@ export default {
                         data_insert.answer[index].image = row._id
                     }
                 }
+                
                 this.$db.Questions.asyncInsert(data_insert)
                 .then(doc => {
                     this.$options.parent.writeLog(1, doc._id, `Đã thêm câu hỏi "${doc.title}"`)

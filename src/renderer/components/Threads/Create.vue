@@ -6,6 +6,10 @@
             <p class="text-danger help-block" v-if="form.errors.title">{{ form.errors.title }}</p>
         </div>
         <div class="form-group">
+            <label>Mật khẩu</label>
+            <input v-model="form.password" type="text" class="form-control" placeholder="Vui lòng nhập một mật khẩu">
+        </div>
+        <div class="form-group">
             <label>Mô tả</label>
             <select class="form-control" v-model="form.description.type">
                 <option value="0">-- Không có --</option>
@@ -41,6 +45,7 @@ export default {
     data: () => ({
         form: {
             title: null,
+            password: null,
             description: {
                 type: 0,
                 video: null,
@@ -127,6 +132,7 @@ export default {
                 let timestamp = Date.now();
                 var data_insert = {
                     title: this.form.title,
+                    password: this.form.password,
                     description: {
                         type: this.form.description.type
                     },

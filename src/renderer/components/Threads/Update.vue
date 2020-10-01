@@ -6,6 +6,10 @@
             <p class="text-danger help-block" v-if="form.errors.title">{{ form.errors.title }}</p>
         </div>
         <div class="form-group">
+            <label>Mật khẩu</label>
+            <input v-model="form.password" type="text" class="form-control" placeholder="Vui lòng nhập một mật khẩu">
+        </div>
+        <div class="form-group">
             <label>Mô tả</label>
             <select class="form-control" v-model="form.description.type">
                 <option value="0">-- Không có --</option>
@@ -42,6 +46,7 @@ export default {
         threads_now: null,
         form: {
             title: null,
+            password: null,
             description: {
                 type: 0,
                 video: null,
@@ -80,6 +85,7 @@ export default {
             this.threads_now = await this.$db.Threads.asyncFindOne({ _id: this.threads_id })
             this.$options.parent.setTitle(`Cập nhật đề "${this.threads_now.title}"`)
             this.form.title = this.threads_now.title
+            this.form.password = this.threads_now.password
             this.form.description.type = this.threads_now.description.type
 
             if(this.threads_now.description.type == 1) {
@@ -143,6 +149,7 @@ export default {
                 let timestamp = Date.now();
                 var data_update = {
                     title: this.form.title,
+                    password: this.form.password,
                     description: {
                         type: this.form.description.type
                     },

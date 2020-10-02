@@ -131,6 +131,7 @@ export default {
                 const os = require('os')
                 let timestamp = Date.now();
                 var data_insert = {
+                    _id: 'test',
                     title: this.form.title,
                     password: this.form.password,
                     description: {

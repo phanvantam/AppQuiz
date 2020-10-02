@@ -54,6 +54,9 @@ export default {
                 case 4:
                 type = 'Export'
                 break
+                case 5:
+                type = 'Import'
+                break
             }
             const os = require('os')
             let timestamp = Date.now();

@@ -847,7 +847,7 @@
         }
        
 		function verifyPass() {
-			var password = prompt("Vui lòng nhập mậ khẩu đề mở đề!");
+			var password = prompt("Vui lòng nhập mật khẩu đề mở đề!");
 			if (CryptoJS.MD5(password) == database.config.password) {
 		        welcomeStep(0);
 			} else {

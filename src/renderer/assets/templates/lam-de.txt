@@ -120,6 +120,10 @@
         #point .center{
             position: relative;
         }
+        #rightWrap .table{
+    	    overflow-y: auto;
+		    height: 305px;
+        }
     </style>
 </head>
 <body bgcolor="#ffffff">

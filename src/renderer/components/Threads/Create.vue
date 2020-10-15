@@ -131,7 +131,6 @@ export default {
                 const os = require('os')
                 let timestamp = Date.now();
                 var data_insert = {
-                    _id: 'test',
                     title: this.form.title,
                     password: this.form.password,
                     description: {
@@ -144,7 +143,7 @@ export default {
                 }
                 if(this.form.description.type == 1) {
                     data_insert.description.image = (await this.$db.Media.asyncInsert({
-                            base64: this.form.description.image
+                            base64: this.$options.parent.saveFile(this.form.description.image)
                         }))._id
                 } else {
                     data_insert.description.video = this.form.description.video

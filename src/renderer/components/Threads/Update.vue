@@ -90,6 +90,7 @@ export default {
 
             if(this.threads_now.description.type == 1) {
                 this.form.description.image = (await this.$db.Media.asyncFindOne({ _id: this.threads_now.description.image})).base64
+                this.form.description.image = this.$options.parent.readFile(this.form.description.image)
             } else {
                 this.form.description.video = this.threads_now.description.video
             }
@@ -160,7 +161,7 @@ export default {
                 }
                 if(this.form.description.type == 1) {
                     data_update.description.image = (await this.$db.Media.asyncInsert({
-                            base64: this.form.description.image
+                            base64: this.$options.parent.saveFile(this.form.description.image)
                         }))._id
                 } else {
                     data_update.description.video = this.form.description.video

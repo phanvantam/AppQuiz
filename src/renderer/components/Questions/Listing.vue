@@ -28,6 +28,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>#</th>
                 <th>STT</th>
                 <th>Tiêu đề</th>
                 <th>Điểm</th>
@@ -40,9 +41,10 @@
         <tbody>
             <tr v-for="(row, index) in table.listing">
                 <td>{{ index+1 }}</td>
+                <td>{{ row.stt }}</td>
                 <td>{{ row.title }}</td>
                 <td>{{ row.point }}</td>
-                <td>{{ row.minute }}</td>
+                <td>{{ row.minute/60 }}</td>
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
                 <td class="actions">
@@ -123,6 +125,10 @@ export default {
                         return b.time - a.time
                 })
             }
+            // Sort stt
+            rows.sort((a, b)=>{
+                return a.stt - b.stt
+            })
             this.table.listing = rows
         },
         formatDate(unix_timestamp) {

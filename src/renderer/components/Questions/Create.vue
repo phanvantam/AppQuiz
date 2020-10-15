@@ -1,8 +1,13 @@
 <template>
     <form class="form" @submit.prevent="create">
         <div class="form-group">
+            <label>Thứ tự </label>
+            <input v-model="form.stt" type="number" class="form-control" placeholder="Vui lòng nhập" />
+            <p class="text-danger help-block" v-if="form.errors.stt">{{ form.errors.stt }}</p>
+        </div>
+        <div class="form-group">
             <label>Tiêu đề <span class="text-danger">*</span></label>
-            <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập">
+            <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập" />
             <p class="text-danger help-block" v-if="form.errors.title">{{ form.errors.title }}</p>
         </div>
         <div class="form-group">
@@ -39,7 +44,7 @@
         </div>
         <div class="form-group">
             <label>Thời gian </label>
-            <input v-model="form.minute" type="number" class="form-control" placeholder="Thời gian tính bằng phút. Vd: 10">
+            <input v-model="form.minute" type="number" class="form-control" placeholder="Thời gian tính bằng giây. Vd: 10">
         </div>
         <div class="form-group">
             <label>Điểm </label>
@@ -79,6 +84,7 @@ export default {
     data: () => ({
         threads_id: null,
         form: {
+            stt: 1,
             title: null,
             minute: null,
             point: null,
@@ -173,6 +179,7 @@ export default {
         },
         resetFormErrors() {
             this.form.errors = {
+                stt: null,
                 title: null,
                 minute: null,
                 point: null,
@@ -190,7 +197,13 @@ export default {
                 this.form.errors.answer[this.form.answer[i].key] = null
         },
         addAnswer() {
-            let uid = Math.floor(Math.random() * 100)
+            var uid = null
+            do {
+                uid = Math.floor(Math.random() * 100)
+                for(let i in this.form.answer) {
+                    if(this.form.answer[i].key == uid) uid = null
+                }
+            } while(uid == null)
             this.form.answer.push({
                 active: false,
                 content: null,
@@ -229,6 +242,11 @@ export default {
                 return false
             }
 
+            if(Number(this.form.stt) <= 0) {
+                this.form.errors.stt = 'Số thứ tự phải lớn hơn 0'
+                return false
+            }
+
             let answer_active = false
             for(let i in this.form.answer) {
                 let item = this.form.answer[i]
@@ -251,6 +269,7 @@ export default {
                 let timestamp = Date.now();
                 var data_insert = {
                     threads_id: this.threads_id,
+                    stt: this.form.stt,
                     title: this.form.title,
                     minute: this.form.minute,
                     point: this.form.point,
@@ -268,7 +287,7 @@ export default {
                 for(let index in this.form.questions) {
                     if(index !== 'type' && this.form.questions[index] !== null) {
                         let row = await this.$db.Media.asyncInsert({
-                            base64: this.form.questions[index]
+                            base64: this.$options.parent.saveFile(this.form.questions[index])
                         })
                         data_insert.questions[index] = row._id
                     }
@@ -276,7 +295,7 @@ export default {
                 for(let index in data_insert.answer) {
                     if(data_insert.answer[index].content == null) {
                         let row = await this.$db.Media.asyncInsert({
-                            base64: data_insert.answer[index].image
+                            base64: this.$options.parent.saveFile(data_insert.answer[index].image)
                         })
                         data_insert.answer[index].image = row._id
                     }

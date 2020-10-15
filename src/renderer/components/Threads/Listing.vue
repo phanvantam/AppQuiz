@@ -44,13 +44,14 @@
                 <td>{{ row.title }}</td>
                 <td>{{ row.questions.count }}</td>
                 <td>{{ row.questions.point }}</td>
-                <td>{{ row.questions.minute }}</td>
+                <td>{{ row.questions.minute/60 }}</td>
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
                 <td class="actions">
                     <router-link :to="{name: 'questions.listing', params: {id: row._id}}"><span class="icon icon-folder"></span></router-link>
                     <router-link :to="{name: 'threads.update', params: {id: row._id}}"><span class="icon icon-pencil"></span></router-link>
                     <a href="#" @click="exportHtml(index)"><span class="icon icon-download"></span></a>
+                    <a href="#" @click="copy(index)"><span class="icon icon-clipboard"></span></a>
                     <a href="#" @click="removeRecord(index)"><span class="icon icon-trash"></span></a>
                 </td>
             </tr>
@@ -209,7 +210,9 @@ export default {
                 return;
             }
             var row = this.table.listing[index]
-            var questions = await this.$db.Questions.asyncFind({'threads_id': row._id})
+            var questions = (await this.$db.Questions.asyncFind({'threads_id': row._id})).sort((a, b)=>{
+                    return a.stt - b.stt
+                })
 
             var welcome = {
                 button: [
@@ -219,7 +222,7 @@ export default {
             }
             switch(Number(row.description.type)) {
                 case 1:
-                    welcome.img = (await this.$db.Media.asyncFindOne({ _id: row.description.image})).base64
+                    welcome.img = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: row.description.image})).base64)
                 break
                 case 2:
                     welcome.video = row.description.video
@@ -232,12 +235,12 @@ export default {
             for(let i in questions) {
                 for(let i2 in questions[i].questions) {
                     if(i2 !== 'type' && questions[i].questions[i2] !== null) {
-                        questions[i].questions[i2] = (await this.$db.Media.asyncFindOne({ _id: questions[i].questions[i2]})).base64
+                        questions[i].questions[i2] = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].questions[i2]})).base64)
                     }
                 }
                 for(let i2 in questions[i].answer) {
                     if('image' in questions[i].answer[i2] && questions[i].answer[i2].content === null  && questions[i].answer[i2].image !== null) {
-                        questions[i].answer[i2].image = (await this.$db.Media.asyncFindOne({ _id: questions[i].answer[i2].image})).base64
+                        questions[i].answer[i2].image = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].answer[i2].image})).base64)
                     }
                 }
             }
@@ -254,6 +257,25 @@ export default {
             document.body.appendChild(fileLink);
             fileLink.click();
             this.$options.parent.writeLog(4, row._id, `Đã tải xuống đề "${row.title}"`)
+        },
+        async copy(index) {
+            if(!confirm("Xác nhận nhân bản đề?")) {
+                return;
+            }
+            var row = this.table.listing[index]
+            var questions = (await this.$db.Questions.asyncFind({'threads_id': row._id}))
+
+            delete row._id
+            row.title  += ' - Copy'
+            await this.$db.Threads.asyncInsert(row).then(doc => {
+                row = doc
+            })
+            for(let i in questions) {
+                delete questions[i]._id
+                questions[i].threads_id = row._id
+                await this.$db.Questions.asyncInsert(questions[i])
+            }
+            this.getData()
         }
     }
 }

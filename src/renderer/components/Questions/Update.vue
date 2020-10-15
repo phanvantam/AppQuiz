@@ -1,6 +1,11 @@
 <template>
     <form class="form" @submit.prevent="update">
         <div class="form-group">
+            <label>Thứ tự </label>
+            <input v-model="form.stt" type="number" class="form-control" placeholder="Vui lòng nhập" />
+            <p class="text-danger help-block" v-if="form.errors.stt">{{ form.errors.stt }}</p>
+        </div>
+        <div class="form-group">
             <label>Tiêu đề <span class="text-danger">*</span></label>
             <input v-model="form.title" type="text" class="form-control" placeholder="Vui lòng nhập">
             <p class="text-danger help-block" v-if="form.errors.title">{{ form.errors.title }}</p>
@@ -39,7 +44,7 @@
         </div>
         <div class="form-group">
             <label>Thời gian </label>
-            <input v-model="form.minute" type="number" class="form-control" placeholder="Thời gian tính bằng phút. Vd: 10">
+            <input v-model="form.minute" type="number" class="form-control" placeholder="Thời gian tính bằng giây. Vd: 10">
         </div>
         <div class="form-group">
             <label>Điểm </label>
@@ -69,7 +74,7 @@
         </div>
         <div class="form-actions">
             <router-link :to="{name: 'questions.listing', params: {id: threads_id}}" class="btn btn-form btn-default btn-large">Hủy bỏ</router-link>
-            <span @click="create" type="submit" class="btn btn-form btn-primary btn-large">Cập nhật</span>
+            <span @click="update" type="submit" class="btn btn-form btn-primary btn-large">Cập nhật</span>
         </div>
     </form>
 </template>
@@ -81,6 +86,7 @@ export default {
         threads_id: null,
         questions_now: null,
         form: {
+            stt: 0,
             title: null,
             minute: null,
             point: null,
@@ -145,19 +151,20 @@ export default {
             this.form.title = this.questions_now.title
             this.form.note = this.questions_now.note
             this.form.point = this.questions_now.point
+            this.form.stt = 'stt' in this.questions_now ? this.questions_now.stt : 1
 
             // Udate key image
             for(let index in this.questions_now.questions) {
                 if(index !== 'type' && this.questions_now.questions[index] !== null) {
                     let row = await this.$db.Media.asyncFindOne({ _id: this.questions_now.questions[index]})
-                    this.form.questions[index] = row.base64
+                    this.form.questions[index] = this.$options.parent.readFile(row.base64)
                 }
             }
             for(let index in this.questions_now.answer) {
                 let temp = Object.assign({}, this.questions_now.answer[index])
                 if('image' in temp && temp.content === null  && temp.image !== null) {
                     let row = await this.$db.Media.asyncFindOne({ _id: temp.image})
-                    temp.image = row.base64
+                    temp.image = this.$options.parent.readFile(row.base64)
                 }
                 this.form.answer.push(temp)
             }
@@ -200,6 +207,7 @@ export default {
         },
         resetFormErrors() {
             this.form.errors = {
+                stt: null,
                 title: null,
                 minute: null,
                 point: null,
@@ -217,7 +225,13 @@ export default {
                 this.form.errors.answer[this.form.answer[i].key] = null
         },
         addAnswer() {
-            let uid = Math.floor(Math.random() * 100)
+            var uid = null
+            do {
+                uid = Math.floor(Math.random() * 100)
+                for(let i in this.form.answer) {
+                    if(this.form.answer[i].key == uid) uid = null
+                }
+            } while(uid == null)
             this.form.answer.push({
                 active: false,
                 content: null,
@@ -259,6 +273,11 @@ export default {
                 return false
             }
 
+            if(Number(this.form.stt) <= 0) {
+                this.form.errors.stt = 'Số thứ tự phải lớn hơn 0'
+                return false
+            }
+
             let answer_active = false
             for(let i in this.form.answer) {
                 let item = this.form.answer[i]
@@ -275,13 +294,14 @@ export default {
             }
             return pass
         },
-        async create() {
+        async update() {
             if(this.valiadted()) {
                 const os = require('os')
                 let timestamp = Date.now();
                 var data_update = {
                     threads_id: this.questions_now.threads_id,
                     title: this.form.title,
+                    stt: this.form.stt,
                     minute: this.form.minute,
                     point: this.form.point,
                     note: this.form.note,
@@ -298,7 +318,7 @@ export default {
                 for(let index in this.form.questions) {
                     if(index !== 'type' && this.form.questions[index] !== null) {
                         let row = await this.$db.Media.asyncInsert({
-                            base64: this.form.questions[index]
+                            base64: this.$options.parent.saveFile(this.form.questions[index])
                         })
                         data_update.questions[index] = row._id
                     }
@@ -306,7 +326,7 @@ export default {
                 for(let index in data_update.answer) {
                     if(data_update.answer[index].content == null) {
                         let row = await this.$db.Media.asyncInsert({
-                            base64: data_update.answer[index].image
+                            base64: this.$options.parent.saveFile(data_update.answer[index].image)
                         })
                         data_update.answer[index].image = row._id
                     }

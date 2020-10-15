@@ -71,6 +71,35 @@ export default {
         },
         setTitle(v){
             this.title = v
+        },
+        saveFile(data, filename=null) {
+            const fs = require('fs');
+            if(!fs.existsSync(`${this.$dataPath}/media`)) fs.mkdir(`${this.$dataPath}/media`)
+            try { 
+                filename = filename != null ? filename : Date.now() +'_'+ Math.floor(Math.random() * 500) 
+                fs.writeFileSync(`${this.$dataPath}/media/${filename}.txt`, data, 'utf-8')
+                return filename
+            } catch(e) {
+                alert('Hệ thống phát sinh lỗi, vui lòng báo lại nhà phát triển!') 
+                return null
+            }
+        },
+        readFile(filename) {
+            const fs = require('fs');
+            try {
+                return fs.readFileSync(`${this.$dataPath}/media/${filename}.txt`, 'utf-8');
+            } catch(e) {
+                return null
+            }
+        },
+        removeFile(filename) {
+            const fs = require('fs');
+            fs.unlink(`${this.$dataPath}/media/${filename}.txt`, function (err) {
+                if(err) {
+                    return false
+                }
+                return true
+            });
         }
     }
 }

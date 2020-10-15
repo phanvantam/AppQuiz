@@ -11,7 +11,7 @@ Vue.config.productionTip = false
 /*Enbled nedb*/
 const electron = require('electron');
 Vue.electron   = Vue.prototype.$electron = electron;
-const userData = electron.remote.app.getPath('userData');
+const userData = Vue.prototype.$dataPath = electron.remote.app.getPath('userData');
 const { AsyncNedb } = require('nedb-async')
 /*Danh sách table chứa data*/
 var db = {};

@@ -40,14 +40,14 @@ export default {
             var threads   = await this.$db.Threads.asyncFind({})
             var questions = await this.$db.Questions.asyncFind({})
             var media     = await this.$db.Media.asyncFind({})
-            for(let i in media) {
-                if(isBase64(media[i].base64) || !(new RegExp(/[\d]+\_[\d]+/g).test(media[i].base64))) {
-                    media[i].fileData = media[i].base64
-                    media[i].base64   = Date.now() +'_'+ Math.floor(Math.random() * 500)
-                } else {
-                    media[i].fileData = this.$options.parent.readFile(media[i].base64)
-                }
-            }
+            // for(let i in media) {
+            //     if(isBase64(media[i].base64) || !(new RegExp(/[\d]+\_[\d]+/g).test(media[i].base64))) {
+            //         media[i].fileData = media[i].base64
+            //         media[i].base64   = Date.now() +'_'+ Math.floor(Math.random() * 500)
+            //     } else {
+            //         media[i].fileData = this.$options.parent.readFile(media[i].base64)
+            //     }
+            // }
             const data_export = {
                 threads: threads,
                 questions: questions,
@@ -98,8 +98,8 @@ export default {
                 }
                 for(let index in result.media) {
                     var row = result.media[index]
-                    this.$options.parent.saveFile(row.fileData, row.base64)
-                    delete row.fileData
+                    // this.$options.parent.saveFile(row.fileData, row.base64)
+                    // delete row.fileData
                     if(await this.$db.Media.asyncFindOne({ _id: row._id }) == null) {
                         // Thêm bản ghi 
                         await this.$db.Media.asyncInsert(row)

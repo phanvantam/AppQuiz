@@ -13,6 +13,12 @@
         </div>
         <hr />
         <div class="form-group">
+            <label>Thư mục lưu trữ tệp hình ảnh/âm thanh</label><br />
+            <input class="form-control" :value="($dataPath + '/media')" />
+            <p>*<i>Khi xuất dữ liệu đề cần truy cập folder trên để copy tất cả các tệp sang folder tương ứng trên máy mới</i></p>
+        </div>
+        <hr />
+        <div class="form-group">
             <label>Xóa lịch sử thao tác của hệ thống</label><br />
             <button @click="removeLog" class="btn btn-form btn-negative">Xóa lịch sử</button>
         </div>

@@ -32,7 +32,8 @@
                 <th>Tiêu đề</th>
                 <th>Số câu hỏi</th>
                 <th>Tổng điểm</th>
-                <th>Thời gian (m)</th>
+                <th>Thời gian đọc (m)</th>
+                <th>Thời gian nghe (m)</th>
                 <th>Tạo lúc</th>
                 <th>Cập nhật lúc</th>
                 <th>Tác vụ</th>
@@ -44,7 +45,8 @@
                 <td>{{ row.title }}</td>
                 <td>{{ row.questions.count }}</td>
                 <td>{{ row.questions.point }}</td>
-                <td>{{ row.questions.minute/60 }}</td>
+                <td>{{ row.time_read }}</td>
+                <td>{{ row.time_listen }}</td>
                 <td>{{ formatDate(row.created_time) }}</td>
                 <td>{{ formatDate(row.updated_time) }}</td>
                 <td class="actions">
@@ -246,10 +248,15 @@ export default {
             }
             var template = require('raw-loader!@/assets/templates/lam-de.txt').default
             template = template.replace('(welcome)', welcome)
-            var MD5 = require("crypto-js/md5");
-            var password = row.password == null ? '' : MD5(row.password)
+            var MD5 = require("crypto-js/md5")
+
+            var password = row.password == "" || row.password == null ? '' : MD5(row.password)
+
             template = template.replace('(password)', password)
+            template = template.replace('(time_read)', row.time_read)
+            template = template.replace('(time_listen)', row.time_listen)
             template = template.replace('(questions)', JSON.stringify(questions))
+
             var fileURL = window.URL.createObjectURL(new Blob([template]));
             var fileLink = document.createElement('a');
             fileLink.href = fileURL;

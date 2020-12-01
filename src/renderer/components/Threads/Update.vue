@@ -10,6 +10,14 @@
             <input v-model="form.password" type="text" class="form-control" placeholder="Vui lòng nhập một mật khẩu">
         </div>
         <div class="form-group">
+            <label>Tổng thời gian câu nghe (phút)</label>
+            <input v-model="form.time_listen" type="number" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+            <label>Tổng thời gian câu đọc (phút)</label>
+            <input v-model="form.time_read" type="number" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
             <label>Mô tả</label>
             <select class="form-control" v-model="form.description.type">
                 <option value="0">-- Không có --</option>
@@ -47,6 +55,8 @@ export default {
         form: {
             title: null,
             password: null,
+            time_listen: 25,
+            time_read: 25,
             description: {
                 type: 0,
                 video: null,
@@ -86,6 +96,8 @@ export default {
             this.$options.parent.setTitle(`Cập nhật đề "${this.threads_now.title}"`)
             this.form.title = this.threads_now.title
             this.form.password = this.threads_now.password
+            this.form.time_listen=  this.threads_now.time_listen
+            this.form.time_read=  this.threads_now.time_read
             this.form.description.type = this.threads_now.description.type
 
             if(this.threads_now.description.type == 1) {
@@ -151,6 +163,8 @@ export default {
                 var data_update = {
                     title: this.form.title,
                     password: this.form.password,
+                    time_listen: this.form.time_listen,
+                    time_read: this.form.time_read,
                     description: {
                         type: this.form.description.type
                     },

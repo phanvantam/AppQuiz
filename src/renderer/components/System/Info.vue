@@ -12,8 +12,8 @@
                     <div class="item"><span class="value">Phan Văn Tâm</span> <span class="label">Developer</span></div>
                     <div class="item"><span class="value">0386 681 574</span> <span class="label">Số điện thoại</span></div>
                     <p style="text-align: center;">Thông tin phần mềm</p>
-                    <div class="item"><span class="value">1.0.4</span> <span class="label">Phiên bản</span> </div>
-                    <div class="item"><span class="value">21/10/2020</span> <span class="label">Ngày phát hành</span> </div>
+                    <div class="item"><span class="value">1.0.5</span> <span class="label">Phiên bản</span> </div>
+                    <div class="item"><span class="value">09/12/2020</span> <span class="label">Ngày phát hành</span> </div>
                 </div>
             </div>
         </div>

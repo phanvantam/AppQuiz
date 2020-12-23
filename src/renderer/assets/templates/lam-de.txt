@@ -334,7 +334,7 @@
         }
         #rightWrap .table{
 		    overflow-y: scroll;
-		    height: 700px;
+		    height: 500px;
         }
     </style>
     <script type="text/javascript">

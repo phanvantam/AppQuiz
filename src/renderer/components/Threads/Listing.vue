@@ -234,17 +234,22 @@ export default {
             }
             welcome = welcome == null ? '' : (JSON.stringify(welcome)+',')
 
-            for(let i in questions) {
-                for(let i2 in questions[i].questions) {
-                    if(i2 !== 'type' && questions[i].questions[i2] !== null) {
-                        questions[i].questions[i2] = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].questions[i2]})).base64)
+            try{
+                for(let i in questions) {
+                    for(let i2 in questions[i].questions) {
+                        if(i2 !== 'type' && questions[i].questions[i2] !== null) {
+                            questions[i].questions[i2] = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].questions[i2]})).base64)
+                        }
+                    }
+                    for(let i2 in questions[i].answer) {
+                        if('image' in questions[i].answer[i2] && questions[i].answer[i2].content === null  && questions[i].answer[i2].image !== null) {
+                            questions[i].answer[i2].image = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].answer[i2].image})).base64)
+                        }
                     }
                 }
-                for(let i2 in questions[i].answer) {
-                    if('image' in questions[i].answer[i2] && questions[i].answer[i2].content === null  && questions[i].answer[i2].image !== null) {
-                        questions[i].answer[i2].image = this.$options.parent.readFile((await this.$db.Media.asyncFindOne({ _id: questions[i].answer[i2].image})).base64)
-                    }
-                }
+            } catch (e) {
+                alert('Đề đang bị lỗi ảnh trong câu hỏi vui lòng sửa trước khi xuất!');
+                return;
             }
             var template = require('raw-loader!@/assets/templates/lam-de.txt').default
             template = template.replace('(welcome)', welcome)

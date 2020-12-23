@@ -156,18 +156,26 @@ export default {
             // Udate key image
             for(let index in this.questions_now.questions) {
                 if(index !== 'type' && this.questions_now.questions[index] !== null) {
-                    let row = await this.$db.Media.asyncFindOne({ _id: this.questions_now.questions[index]})
-                    this.form.questions[index] = this.$options.parent.readFile(row.base64)
+                    try{
+                        let row = await this.$db.Media.asyncFindOne({ _id: this.questions_now.questions[index]})
+                        this.form.questions[index] = this.$options.parent.readFile(row.base64)
+                    } catch (e) {
+                        alert('Câu hỏi bị lỗi ảnh/âm thanh vui lòng nhập lại!')
+                        console.log(this.questions_now.questions[index])
+                    }
                 }
             }
             for(let index in this.questions_now.answer) {
                 let temp = Object.assign({}, this.questions_now.answer[index])
-                if('image' in temp && temp.content === null  && temp.image !== null) {
-                    let row = await this.$db.Media.asyncFindOne({ _id: temp.image})
-                    temp.image = this.$options.parent.readFile(row.base64)
-                }
+                    if('image' in temp && temp.content === null  && temp.image !== null) {
+                        try{
+                            let row = await this.$db.Media.asyncFindOne({ _id: temp.image})
+                            temp.image = this.$options.parent.readFile(row.base64)
+                        } catch (e) {console.log(temp.image)}
+                    }
                 this.form.answer.push(temp)
             }
+
         },
         onPaste (evt) {
             this.getFileBase(evt.clipboardData.files)
